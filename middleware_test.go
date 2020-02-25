@@ -13,7 +13,7 @@ import (
 	"testing"
 )
 
-func TestOpenTracing(t *testing.T) {
+func TestMiddleware(t *testing.T) {
 	tracer, closer, err := NewTracer("test", "")
 	require.NoError(t, err)
 	require.NotNil(t, tracer)
@@ -22,7 +22,7 @@ func TestOpenTracing(t *testing.T) {
 	type response struct {
 		SpanID string
 	}
-	ts := httptest.NewServer(OpenTracing(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	ts := httptest.NewServer(Middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		b, _ := json.Marshal(response{

@@ -7,8 +7,8 @@ import (
 	"net/http"
 )
 
-// OpenTracing - create a new openTracing span and put it into request context
-func OpenTracing(next http.Handler) http.Handler {
+// Middleware - create a new openTracing span and put it into request context
+func Middleware(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		var span opentracing.Span
 		ctx := r.Context()
