@@ -1,4 +1,4 @@
-module OpenTracing
+module github.com/pkgz/OpenTracing
 
 go 1.13
 
