@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -17,6 +18,11 @@ func Request(ctx context.Context, method string, url string, b []byte, auth bool
 	}
 
 	req.Header.Add("Content-Type", "application/json")
+	if auth {
+		if err := SetAuthorization(ctx, req); err != nil {
+			return nil, err
+		}
+	}
 	if err := InjectToReq(ctx, req); err != nil {
 		return nil, err
 	}
@@ -42,4 +48,20 @@ func Request(ctx context.Context, method string, url string, b []byte, auth bool
 	}
 
 	return body, nil
+}
+
+// SetAuthorization - take token from context value and set as Bearer token in Authorization header.
+func SetAuthorization(ctx context.Context, req *http.Request) error {
+	jwtToken := ctx.Value("token")
+	if jwtToken == nil || jwtToken == "" {
+		return errors.New("no token in context")
+	}
+
+	if req == nil {
+		return errors.New("empty request")
+	}
+
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", jwtToken))
+
+	return nil
 }

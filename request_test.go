@@ -71,3 +71,21 @@ func TestRequest(t *testing.T) {
 		require.Equal(t, []byte("OK"), resp)
 	})
 }
+
+func TestSetAuthorization(t *testing.T) {
+	t.Run("empty context", func(t *testing.T) {
+		ctx := context.Background()
+		require.Error(t, SetAuthorization(ctx, nil))
+	})
+	t.Run("empty request", func(t *testing.T) {
+		ctx := context.Background()
+		ctx = context.WithValue(ctx, "token", "test")
+		require.Error(t, SetAuthorization(ctx, nil))
+	})
+	t.Run("ok", func(t *testing.T) {
+		ctx := context.Background()
+		ctx = context.WithValue(ctx, "token", "test")
+		req := httptest.NewRequest("GET", "http://test.com", nil)
+		require.NoError(t, SetAuthorization(ctx, req))
+	})
+}
