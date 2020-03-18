@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/ext"
 	"github.com/pkg/errors"
 	"github.com/uber/jaeger-client-go"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
@@ -58,4 +59,10 @@ func InjectToReq(ctx context.Context, req *http.Request) error {
 		span.Context(),
 		opentracing.HTTPHeaders,
 		opentracing.HTTPHeadersCarrier(req.Header))
+}
+
+// Error - finish a span and set error status
+func Error(span opentracing.Span) {
+	span.SetTag(string(ext.Error), true)
+	span.Finish()
 }

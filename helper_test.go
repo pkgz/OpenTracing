@@ -75,3 +75,9 @@ func TestInjectToReq(t *testing.T) {
 		span.Finish()
 	})
 }
+
+func TestError(t *testing.T) {
+	ctx := context.Background()
+	span, ctx := opentracing.StartSpanFromContext(ctx, "test")
+	Error(span)
+}
