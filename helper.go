@@ -10,15 +10,15 @@ import (
 	jaegercfg "github.com/uber/jaeger-client-go/config"
 	jaegerlog "github.com/uber/jaeger-client-go/log"
 	"github.com/uber/jaeger-lib/metrics"
-	"io"
+	"log"
 	"net/http"
 )
 
 // NewTracer - initializing opentracing tracer and set up global tracer.
-func NewTracer(name string, host string) (opentracing.Tracer, io.Closer, error) {
+func NewTracer(ctx context.Context, name string, host string) (opentracing.Tracer, error) {
 	udpTransport, err := jaeger.NewUDPTransport(fmt.Sprintf("%s:6831", host), 0)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "create transport error")
+		return nil, errors.Wrap(err, "create transport error")
 	}
 
 	cfg := jaegercfg.Configuration{
@@ -43,9 +43,16 @@ func NewTracer(name string, host string) (opentracing.Tracer, io.Closer, error) 
 		jaegercfg.Metrics(jMetricsFactory),
 	)
 
+	go func() {
+		<-ctx.Done()
+		if err = closer.Close(); err != nil {
+			log.Panic(err)
+		}
+	}()
+
 	opentracing.SetGlobalTracer(tracer)
 
-	return tracer, closer, nil
+	return tracer, nil
 }
 
 // InjectToReq - inject opentracing span to *http.Requst

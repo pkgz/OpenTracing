@@ -12,20 +12,20 @@ import (
 )
 
 func TestTracer(t *testing.T) {
-	tracer, closer, err := NewTracer("test", "")
+	ctx := context.Background()
+
+	tracer, err := NewTracer(ctx, "test", "")
 	require.NoError(t, err)
 	require.NotNil(t, tracer)
-	require.NotNil(t, closer)
 
-	tracer, closer, err = NewTracer("test", "wtf")
+	tracer, err = NewTracer(ctx, "test", "wtf")
 	require.Error(t, err)
 }
 
 func TestInjectToReq(t *testing.T) {
-	tracer, closer, err := NewTracer("test", "")
+	tracer, err := NewTracer(context.Background(), "test", "")
 	require.NoError(t, err)
 	require.NotNil(t, tracer)
-	require.NotNil(t, closer)
 
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte(r.Header.Get("Uber-Trace-Id")))

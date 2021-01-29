@@ -14,10 +14,9 @@ import (
 )
 
 func TestMiddleware(t *testing.T) {
-	tracer, closer, err := NewTracer("test", "")
+	tracer, err := NewTracer(context.Background(), "test", "")
 	require.NoError(t, err)
 	require.NotNil(t, tracer)
-	require.NotNil(t, closer)
 
 	type response struct {
 		SpanID string
