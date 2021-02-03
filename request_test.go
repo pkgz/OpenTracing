@@ -23,22 +23,25 @@ func TestRequest(t *testing.T) {
 	defer ts.Close()
 
 	t.Run("invalid method", func(t *testing.T) {
-		resp, err := Request(context.Background(), " ", "", []byte{}, false)
+		resp, code, err := Request(context.Background(), " ", "", []byte{}, false)
 		require.Error(t, err)
 		require.Nil(t, resp)
+		require.Equal(t, 0, code)
 	})
 
 	t.Run("no token", func(t *testing.T) {
-		resp, err := Request(context.Background(), "", "", []byte{}, true)
+		resp, code, err := Request(context.Background(), "", "", []byte{}, true)
 		require.Error(t, err)
 		require.Nil(t, resp)
+		require.Equal(t, 0, code)
 	})
 
 	t.Run("no span", func(t *testing.T) {
 		ctx := context.WithValue(context.Background(), "token", "test")
-		resp, err := Request(ctx, "", "", []byte{}, true)
+		resp, code, err := Request(ctx, "", "", []byte{}, true)
 		require.Error(t, err)
 		require.Nil(t, resp)
+		require.Equal(t, 0, code)
 	})
 
 	t.Run("wrong url", func(t *testing.T) {
@@ -46,9 +49,10 @@ func TestRequest(t *testing.T) {
 		span, ctx := opentracing.StartSpanFromContext(ctx, "test")
 		require.NotNil(t, span)
 
-		resp, err := Request(ctx, "", "", []byte{}, true)
+		resp, code, err := Request(ctx, "", "", []byte{}, true)
 		require.Error(t, err)
 		require.Nil(t, resp)
+		require.Equal(t, 0, code)
 	})
 
 	t.Run("non 1xx, 2xx, 3xx response", func(t *testing.T) {
@@ -56,9 +60,10 @@ func TestRequest(t *testing.T) {
 		span, ctx := opentracing.StartSpanFromContext(ctx, "test")
 		require.NotNil(t, span)
 
-		resp, err := Request(ctx, "GET", ts.URL, []byte{}, true)
+		resp, code, err := Request(ctx, "GET", ts.URL, []byte{}, true)
 		require.Error(t, err)
 		require.Nil(t, resp)
+		require.Equal(t, http.StatusBadRequest, code)
 	})
 
 	t.Run("200", func(t *testing.T) {
@@ -66,9 +71,10 @@ func TestRequest(t *testing.T) {
 		span, ctx := opentracing.StartSpanFromContext(ctx, "test")
 		require.NotNil(t, span)
 
-		resp, err := Request(ctx, "POST", ts.URL, []byte{}, true)
+		resp, code, err := Request(ctx, "POST", ts.URL, []byte{}, true)
 		require.NoError(t, err)
 		require.Equal(t, []byte("OK"), resp)
+		require.Equal(t, http.StatusOK, code)
 	})
 }
 
