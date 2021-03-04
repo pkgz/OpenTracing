@@ -23,14 +23,16 @@ func TestRequest(t *testing.T) {
 	defer ts.Close()
 
 	t.Run("invalid method", func(t *testing.T) {
-		resp, code, err := Request(context.Background(), " ", "", []byte{}, false)
+		resp, code, err := Request(context.Background(), RequestOpts{})
 		require.Error(t, err)
 		require.Nil(t, resp)
 		require.Equal(t, 0, code)
 	})
 
 	t.Run("no token", func(t *testing.T) {
-		resp, code, err := Request(context.Background(), "", "", []byte{}, true)
+		resp, code, err := Request(context.Background(), RequestOpts{
+			InjectBearer: true,
+		})
 		require.Error(t, err)
 		require.Nil(t, resp)
 		require.Equal(t, 0, code)
@@ -38,7 +40,9 @@ func TestRequest(t *testing.T) {
 
 	t.Run("no span", func(t *testing.T) {
 		ctx := context.WithValue(context.Background(), "token", "test")
-		resp, code, err := Request(ctx, "", "", []byte{}, true)
+		resp, code, err := Request(ctx, RequestOpts{
+			InjectBearer: true,
+		})
 		require.Error(t, err)
 		require.Nil(t, resp)
 		require.Equal(t, 0, code)
@@ -49,7 +53,9 @@ func TestRequest(t *testing.T) {
 		span, ctx := opentracing.StartSpanFromContext(ctx, "test")
 		require.NotNil(t, span)
 
-		resp, code, err := Request(ctx, "", "", []byte{}, true)
+		resp, code, err := Request(ctx, RequestOpts{
+			InjectBearer: true,
+		})
 		require.Error(t, err)
 		require.Nil(t, resp)
 		require.Equal(t, 0, code)
@@ -60,7 +66,11 @@ func TestRequest(t *testing.T) {
 		span, ctx := opentracing.StartSpanFromContext(ctx, "test")
 		require.NotNil(t, span)
 
-		resp, code, err := Request(ctx, "GET", ts.URL, []byte{}, true)
+		resp, code, err := Request(ctx, RequestOpts{
+			Method:       "GET",
+			URL:          ts.URL,
+			InjectBearer: true,
+		})
 		require.Error(t, err)
 		require.Nil(t, resp)
 		require.Equal(t, http.StatusBadRequest, code)
@@ -71,7 +81,11 @@ func TestRequest(t *testing.T) {
 		span, ctx := opentracing.StartSpanFromContext(ctx, "test")
 		require.NotNil(t, span)
 
-		resp, code, err := Request(ctx, "POST", ts.URL, []byte{}, true)
+		resp, code, err := Request(ctx, RequestOpts{
+			Method:       "POST",
+			URL:          ts.URL,
+			InjectBearer: true,
+		})
 		require.NoError(t, err)
 		require.Equal(t, []byte("OK"), resp)
 		require.Equal(t, http.StatusOK, code)
