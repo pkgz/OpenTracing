@@ -48,10 +48,6 @@ func Request(ctx context.Context, params RequestOpts) ([]byte, int, error) {
 		return nil, 0, err
 	}
 
-	if resp.StatusCode >= 400 {
-		return nil, resp.StatusCode, errors.New(string(body))
-	}
-
 	return body, resp.StatusCode, nil
 }
 

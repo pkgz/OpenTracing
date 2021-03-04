@@ -71,8 +71,8 @@ func TestRequest(t *testing.T) {
 			URL:          ts.URL,
 			InjectBearer: true,
 		})
-		require.Error(t, err)
-		require.Nil(t, resp)
+		require.NoError(t, err)
+		require.NotNil(t, resp)
 		require.Equal(t, http.StatusBadRequest, code)
 	})
 
